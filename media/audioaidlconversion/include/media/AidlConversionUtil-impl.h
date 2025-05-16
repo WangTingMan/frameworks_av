@@ -441,9 +441,13 @@ static inline ::android::status_t statusTFromBinderStatus(const ::android::binde
     return status.isOk() ? ::android::OK // check ::android::OK,
         : status.serviceSpecificErrorCode() // service-side error, not standard Java exception
                                             // (fromServiceSpecificError)
+#ifdef _MSC_VER
+        ;
+#else
         ?: status.transactionError() // a native binder transaction error (fromStatusT)
         ?: statusTFromExceptionCode(status.exceptionCode()); // a service-side error with a
                                                     // standard Java exception (fromExceptionCode)
+#endif
 }
 #endif
 

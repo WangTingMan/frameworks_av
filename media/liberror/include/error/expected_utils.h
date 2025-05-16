@@ -55,26 +55,26 @@
  */
 
 #define VALUE_OR_RETURN(exp)                                                          \
-    ({                                                                                \
+    [](){                                                                             \
         auto _tmp = (exp);                                                            \
         if (!_tmp.ok()) {                                                             \
             ALOGE("Function: %s Line: %d Failed result (%s)", __FUNCTION__, __LINE__, \
                   errorToString(_tmp.error()).c_str());                               \
             return ::android::base::unexpected(std::move(_tmp.error()));              \
         }                                                                             \
-        std::move(_tmp.value());                                                      \
-    })
+        return std::move(_tmp.value());                                               \
+    }()
 
 #define VALUE_OR_RETURN_STATUS(exp)                                                   \
-    ({                                                                                \
+    [](){                                                                             \
         auto _tmp = (exp);                                                            \
         if (!_tmp.ok()) {                                                             \
             ALOGE("Function: %s Line: %d Failed result (%s)", __FUNCTION__, __LINE__, \
                   errorToString(_tmp.error()).c_str());                               \
             return std::move(_tmp.error());                                           \
         }                                                                             \
-        std::move(_tmp.value());                                                      \
-    })
+        return std::move(_tmp.value());                                               \
+    }()
 
 #define VALUE_OR_FATAL(exp)                                                                       \
     ({                                                                                            \
@@ -85,22 +85,22 @@
     })
 
 #define RETURN_IF_ERROR(exp)                                                \
-    ({                                                                      \
+    {                                                                       \
         auto _tmp = (exp);                                                  \
         if (!errorIsOk(_tmp)) {                                             \
             ALOGE("Function: %s Line: %d Failed ", __FUNCTION__, __LINE__); \
             return ::android::base::unexpected(std::move(_tmp));            \
         }                                                                   \
-    })
+    }
 
 #define RETURN_STATUS_IF_ERROR(exp)                                         \
-    ({                                                                      \
+    {                                                                       \
         auto _tmp = (exp);                                                  \
         if (!errorIsOk(_tmp)) {                                             \
             ALOGE("Function: %s Line: %d Failed ", __FUNCTION__, __LINE__); \
             return _tmp;                                                    \
         }                                                                   \
-    })
+    }
 
 #define FATAL_IF_ERROR(exp)                                                                \
     {                                                                                      \
