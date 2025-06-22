@@ -94,7 +94,11 @@ template<typename InputIterator, typename OutputIterator, typename Func>
                       OutputIterator out,
                       const Func& itemConversion) {
     for (InputIterator iter = start; iter != end; ++iter, ++out) {
+#ifdef _MSC_VER
+        VALUE_OR_RETURN_STATUS_WITH_VAR(*out, itemConversion(*iter));
+#else
         *out = VALUE_OR_RETURN_STATUS(itemConversion(*iter));
+#endif
     }
     return ::android::OK;
 }
@@ -142,7 +146,17 @@ convertContainer(const InputContainer& input, const Func& itemConversion) {
     OutputContainer output;
     auto ins = std::inserter(output, output.begin());
     for (const auto& item : input) {
+#ifdef _MSC_VER
+        auto _tmp = (itemConversion(item));
+        if (!_tmp.ok()) {
+            ALOGE("Function: %s Line: %d Failed result (%s)", __FUNCTION__, __LINE__,
+                  errorToString(_tmp.error()).c_str());
+            return ::android::base::unexpected(std::move(_tmp.error()));
+        }
+        *ins = std::move(_tmp.value());
+#else
         *ins = VALUE_OR_RETURN(itemConversion(item));
+#endif
     }
     return output;
 }
@@ -157,7 +171,11 @@ convertContainer(const InputContainer& input, const Func& itemConversion, const 
     OutputContainer output;
     auto ins = std::inserter(output, output.begin());
     for (const auto& item : input) {
+#ifdef _MSC_VER
+        VALUE_OR_RETURN_WITH_VAR(*ins, itemConversion(item, param));
+#else
         *ins = VALUE_OR_RETURN(itemConversion(item, param));
+#endif
     }
     return output;
 }
@@ -177,7 +195,11 @@ convertContainers(const InputContainer1& input1, const InputContainer2& input2,
     auto ins = std::inserter(output, output.begin());
     for (const auto& item1 : input1) {
         RETURN_IF_ERROR(iter2 != input2.end() ? ::android::OK : ::android::BAD_VALUE);
+#ifdef _MSC_VER
+        VALUE_OR_RETURN_WITH_VAR(*ins, itemConversion(item1, *iter2++));
+#else
         *ins = VALUE_OR_RETURN(itemConversion(item1, *iter2++));
+#endif
     }
     return output;
 }
@@ -196,7 +218,17 @@ convertContainerSplit(const InputContainer& input, const Func& itemConversion) {
     auto ins1 = std::inserter(output1, output1.begin());
     auto ins2 = std::inserter(output2, output2.begin());
     for (const auto& item : input) {
+#ifdef _MSC_VER
+        auto _tmp = itemConversion(item);
+        if (!_tmp.ok()) {
+            ALOGE("Function: %s Line: %d Failed result (%s)", __FUNCTION__, __LINE__,
+                  errorToString(_tmp.error()).c_str());
+            return ::android::base::unexpected(std::move(_tmp.error()));              \
+        }
+        auto out_pair = std::move(_tmp.value());
+#else
         auto out_pair = VALUE_OR_RETURN(itemConversion(item));
+#endif
         *ins1 = out_pair.first;
         *ins2 = out_pair.second;
     }
@@ -294,7 +326,12 @@ ConversionResult<DestMask> convertBitmask(
     while (usrc != 0) {
         if (usrc & 1) {
             SrcEnum srcEnum = srcIndexToEnum(srcBitIndex);
+#ifdef _MSC_VER
+            DestEnum destEnum;
+            VALUE_OR_RETURN_WITH_VAR(destEnum, enumConversion(srcEnum));
+#else
             DestEnum destEnum = VALUE_OR_RETURN(enumConversion(srcEnum));
+#endif
             DestMask destMask = destEnumToMask(destEnum);
             dest |= destMask;
         }
@@ -456,12 +493,33 @@ static inline ::android::status_t statusTFromBinderStatus(const ::ndk::ScopedASt
     // What we want to do is to 'return statusTFromBinderStatus(status.get()->get())'
     // However, since the definition of AStatus is not exposed, we have to do the same
     // via methods of ScopedAStatus:
+#ifdef _MSC_VER
+    if (status.isOk())
+    {
+        return ::android::OK;
+    }
+
+    auto error = status.getServiceSpecificError();
+    if (error)
+    {
+        return error;
+    }
+
+    auto status_ = status.getStatus();
+    if (status_)
+    {
+        return status_;
+    }
+
+    return  statusTFromExceptionCode(status.getExceptionCode());
+#else
     return status.isOk() ? ::android::OK // check ::android::OK,
         : status.getServiceSpecificError() // service-side error, not standard Java exception
                                            // (fromServiceSpecificError)
         ?: status.getStatus() // a native binder transaction error (fromStatusT)
         ?: statusTFromExceptionCode(status.getExceptionCode()); // a service-side error with a
                                                      // standard Java exception (fromExceptionCode)
+#endif
 }
 
 static inline ::android::status_t statusTFromBinderStatusT(binder_status_t status) {

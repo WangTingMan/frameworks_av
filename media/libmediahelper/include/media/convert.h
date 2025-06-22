@@ -23,6 +23,8 @@
 #include <stdint.h>
 #include <cmath>
 
+#include "libmedia_helper_exports_.h"
+
 namespace android
 {
 

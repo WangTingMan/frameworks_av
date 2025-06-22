@@ -175,7 +175,7 @@ status_t AudioValidator::validatePlaybackRate(
         const audio_playback_rate_t& playbackRate)
 {
     if (playbackRate.mSpeed < 0.f || playbackRate.mPitch < 0.f) return BAD_VALUE;
-    return validatePlaybackRateFallbackMode(playbackRate.mFallbackMode) ?:
+    return validatePlaybackRateFallbackMode(playbackRate.mFallbackMode) ? 0 :
             validatePlaybackRateStretchMode(playbackRate.mStretchMode);
 }
 

@@ -23,6 +23,8 @@
 #include <hardware/audio.h>
 #include <system/audio.h>
 
+#include <cutils/memory.h>
+
 namespace android {
 
 // static

@@ -21,9 +21,11 @@
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
 
+#include "libmedia_helper_exports_.h"
+
 namespace android {
 
-class AudioParameter {
+class LIBMEDIAHELPER_API AudioParameter {
 
 public:
     AudioParameter() {}

@@ -24,13 +24,15 @@
 
 #include <string_view>
 
+#include "libmedia_helper_exports_.h"
+
 namespace android {
 
 /**
  * AudioValidator is a class to validate audio data in binder call. NO_ERROR will be returned only
  * when there is no error with the data.
  */
-class AudioValidator {
+class LIBMEDIAHELPER_API AudioValidator {
 public:
     /**
      * Return NO_ERROR only when there is no error with the given audio attributes.

@@ -55,7 +55,7 @@
  */
 
 #define VALUE_OR_RETURN(exp)                                                          \
-    [](){                                                                             \
+    {                                                                                 \
         auto _tmp = (exp);                                                            \
         if (!_tmp.ok()) {                                                             \
             ALOGE("Function: %s Line: %d Failed result (%s)", __FUNCTION__, __LINE__, \
@@ -63,10 +63,21 @@
             return ::android::base::unexpected(std::move(_tmp.error()));              \
         }                                                                             \
         return std::move(_tmp.value());                                               \
-    }()
+    }
+
+#define VALUE_OR_RETURN_WITH_VAR(var, exp)                                            \
+    {                                                                                 \
+        auto _tmp = (exp);                                                            \
+        if (!_tmp.ok()) {                                                             \
+            ALOGE("Function: %s Line: %d Failed result (%s)", __FUNCTION__, __LINE__, \
+                  errorToString(_tmp.error()).c_str());                               \
+            return ::android::base::unexpected(std::move(_tmp.error()));              \
+        }                                                                             \
+        var = std::move(_tmp.value());                                                \
+    }
 
 #define VALUE_OR_RETURN_STATUS(exp)                                                   \
-    [](){                                                                             \
+    [&](){                                                                             \
         auto _tmp = (exp);                                                            \
         if (!_tmp.ok()) {                                                             \
             ALOGE("Function: %s Line: %d Failed result (%s)", __FUNCTION__, __LINE__, \
@@ -76,13 +87,24 @@
         return std::move(_tmp.value());                                               \
     }()
 
+#define VALUE_OR_RETURN_STATUS_WITH_VAR(var,exp)                                      \
+    {                                                                             \
+        auto _tmp = (exp);                                                            \
+        if (!_tmp.ok()) {                                                             \
+            ALOGE("Function: %s Line: %d Failed result (%s)", __FUNCTION__, __LINE__, \
+                  errorToString(_tmp.error()).c_str());                               \
+            return std::move(_tmp.error());                                           \
+        }                                                                             \
+        var = std::move(_tmp.value());                                                \
+    }
+
 #define VALUE_OR_FATAL(exp)                                                                       \
-    ({                                                                                            \
+    [&]{                                                                                           \
         auto _tmp = (exp);                                                                        \
         LOG_ALWAYS_FATAL_IF(!_tmp.ok(), "Function: %s Line: %d Failed result (%s)", __FUNCTION__, \
                             __LINE__, errorToString(_tmp.error()).c_str());                       \
-        std::move(_tmp.value());                                                                  \
-    })
+        return std::move(_tmp.value());                                                           \
+    }()
 
 #define RETURN_IF_ERROR(exp)                                                \
     {                                                                       \

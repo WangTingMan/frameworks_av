@@ -27,6 +27,13 @@
 #include <media/AidlConversionNdk.h>
 #include <Utils.h>
 
+#ifdef _MSC_VER
+static void not_reach()
+{
+    ALOGF("should not reach here!");
+}
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // AIDL NDK backend to legacy audio data structure conversion utilities.
 
@@ -83,7 +90,9 @@ std::vector<std::string> filterOutNonVendorTags(const std::vector<std::string>& 
 ConversionResult<buffer_config_t> aidl2legacy_AudioConfig_buffer_config_t(
         const media::audio::common::AudioConfig& aidl, bool isInput) {
     buffer_config_t legacy;
-
+#ifdef _MSC_VER
+    not_reach();
+#else
     legacy.samplingRate = VALUE_OR_RETURN(convertIntegral<uint32_t>(aidl.base.sampleRate));
     legacy.mask |= EFFECT_CONFIG_SMP_RATE;
 
@@ -95,7 +104,7 @@ ConversionResult<buffer_config_t> aidl2legacy_AudioConfig_buffer_config_t(
             VALUE_OR_RETURN(aidl2legacy_AudioFormatDescription_audio_format_t(aidl.base.format));
     legacy.mask |= EFFECT_CONFIG_FORMAT;
     legacy.buffer.frameCount = aidl.frameCount;
-
+#endif
     // TODO: add accessMode and mask
     return legacy;
 }
@@ -103,7 +112,9 @@ ConversionResult<buffer_config_t> aidl2legacy_AudioConfig_buffer_config_t(
 ConversionResult<media::audio::common::AudioConfig>
 legacy2aidl_buffer_config_t_AudioConfig(const buffer_config_t& legacy, bool isInput) {
     media::audio::common::AudioConfig aidl;
-
+#ifdef _MSC_VER
+    not_reach();
+#else
     if (legacy.mask & EFFECT_CONFIG_SMP_RATE) {
         aidl.base.sampleRate = VALUE_OR_RETURN(convertIntegral<int32_t>(legacy.samplingRate));
     }
@@ -116,7 +127,7 @@ legacy2aidl_buffer_config_t_AudioConfig(const buffer_config_t& legacy, bool isIn
                 static_cast<audio_format_t>(legacy.format)));
     }
     aidl.frameCount = legacy.buffer.frameCount;
-
+#endif
     // TODO: add accessMode and mask
     return aidl;
 }
@@ -131,14 +142,22 @@ legacy2aidl_buffer_config_t_AudioConfig(const buffer_config_t& legacy, bool isIn
 }
 
 ConversionResult<std::vector<std::string>> legacy2aidl_AudioAttributesTags(const char* legacy) {
+#ifdef _MSC_VER
+    not_reach();
+    return ConversionResult<std::vector<std::string>>();
+#else
     std::string legacyTags = VALUE_OR_RETURN(legacy2aidl_string(
                     legacy, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE));
     return filterOutNonVendorTags(splitString(legacyTags, AUDIO_ATTRIBUTES_TAGS_SEPARATOR));
+#endif
 }
 
 ConversionResult<playback_track_metadata_v7>
 aidl2legacy_PlaybackTrackMetadata_playback_track_metadata_v7(const PlaybackTrackMetadata& aidl) {
     playback_track_metadata_v7 legacy;
+#ifdef _MSC_VER
+    not_reach();
+#else
     legacy.base.usage = VALUE_OR_RETURN(aidl2legacy_AudioUsage_audio_usage_t(aidl.usage));
     legacy.base.content_type = VALUE_OR_RETURN(aidl2legacy_AudioContentType_audio_content_type_t(
                     aidl.contentType));
@@ -146,6 +165,7 @@ aidl2legacy_PlaybackTrackMetadata_playback_track_metadata_v7(const PlaybackTrack
     legacy.channel_mask = VALUE_OR_RETURN(aidl2legacy_AudioChannelLayout_audio_channel_mask_t(
                     aidl.channelMask, false /*isInput*/));
     RETURN_IF_ERROR(aidl2legacy_AudioAttributesTags(aidl.tags, legacy.tags));
+#endif
     return legacy;
 }
 
@@ -153,6 +173,9 @@ ConversionResult<PlaybackTrackMetadata>
 legacy2aidl_playback_track_metadata_v7_PlaybackTrackMetadata(
         const playback_track_metadata_v7& legacy) {
     PlaybackTrackMetadata aidl;
+#ifdef _MSC_VER
+    not_reach();
+#else
     aidl.usage = VALUE_OR_RETURN(legacy2aidl_audio_usage_t_AudioUsage(legacy.base.usage));
     aidl.contentType = VALUE_OR_RETURN(legacy2aidl_audio_content_type_t_AudioContentType(
                     legacy.base.content_type));
@@ -160,12 +183,16 @@ legacy2aidl_playback_track_metadata_v7_PlaybackTrackMetadata(
     aidl.channelMask = VALUE_OR_RETURN(legacy2aidl_audio_channel_mask_t_AudioChannelLayout(
                     legacy.channel_mask, false /*isInput*/));
     aidl.tags = VALUE_OR_RETURN(legacy2aidl_AudioAttributesTags(legacy.tags));
+#endif
     return aidl;
 }
 
 ConversionResult<record_track_metadata_v7>
 aidl2legacy_RecordTrackMetadata_record_track_metadata_v7(const RecordTrackMetadata& aidl) {
     record_track_metadata_v7 legacy;
+#ifdef _MSC_VER
+    not_reach();
+#else
     legacy.base.source = VALUE_OR_RETURN(aidl2legacy_AudioSource_audio_source_t(aidl.source));
     legacy.base.gain = aidl.gain;
     if (aidl.destinationDevice.has_value()) {
@@ -177,12 +204,16 @@ aidl2legacy_RecordTrackMetadata_record_track_metadata_v7(const RecordTrackMetada
     legacy.channel_mask = VALUE_OR_RETURN(aidl2legacy_AudioChannelLayout_audio_channel_mask_t(
                     aidl.channelMask, true /*isInput*/));
     RETURN_IF_ERROR(aidl2legacy_AudioAttributesTags(aidl.tags, legacy.tags));
+#endif
     return legacy;
 }
 
 ConversionResult<RecordTrackMetadata>
 legacy2aidl_record_track_metadata_v7_RecordTrackMetadata(const record_track_metadata_v7& legacy) {
     RecordTrackMetadata aidl;
+#ifdef _MSC_VER
+    not_reach();
+#else
     aidl.source = VALUE_OR_RETURN(legacy2aidl_audio_source_t_AudioSource(legacy.base.source));
     aidl.gain = legacy.base.gain;
     if (legacy.base.dest_device != AUDIO_DEVICE_NONE) {
@@ -192,6 +223,7 @@ legacy2aidl_record_track_metadata_v7_RecordTrackMetadata(const record_track_meta
     aidl.channelMask = VALUE_OR_RETURN(legacy2aidl_audio_channel_mask_t_AudioChannelLayout(
                     legacy.channel_mask, true /*isInput*/));
     aidl.tags = VALUE_OR_RETURN(legacy2aidl_AudioAttributesTags(legacy.tags));
+#endif
     return aidl;
 }
 
@@ -200,10 +232,14 @@ ConversionResult<SourceMetadata>
 legacy2aidl_playback_track_metadata_v7_SourceMetadata(
         const std::vector<playback_track_metadata_v7_t>& legacy) {
     SourceMetadata aidl;
+#ifdef _MSC_VER
+    not_reach();
+#else
     aidl.tracks = VALUE_OR_RETURN(
             convertContainer<std::vector<PlaybackTrackMetadata>>(
                     legacy,
                     legacy2aidl_playback_track_metadata_v7_PlaybackTrackMetadata));
+#endif
     return aidl;
 }
 

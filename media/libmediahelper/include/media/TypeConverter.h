@@ -28,6 +28,8 @@
 #include <media/AudioParameter.h>
 #include "convert.h"
 
+#include "libmedia_helper_exports_.h"
+
 namespace android {
 
 template <typename T>
@@ -455,24 +457,24 @@ inline bool TypeConverter<SourceTraits>::fromStringImpl(
     return audio_source_from_string(str.c_str(), &result);
 }
 
-SampleRateTraits::Collection samplingRatesFromString(
+SampleRateTraits::Collection LIBMEDIAHELPER_API samplingRatesFromString(
         const std::string &samplingRates, const char *del = AudioParameter::valueListSeparator);
 
-FormatTraits::Collection formatsFromString(
+FormatTraits::Collection LIBMEDIAHELPER_API formatsFromString(
         const std::string &formats, const char *del = AudioParameter::valueListSeparator);
 
-audio_format_t formatFromString(
+audio_format_t LIBMEDIAHELPER_API formatFromString(
         const std::string &literalFormat, audio_format_t defaultFormat = AUDIO_FORMAT_DEFAULT);
 
-audio_channel_mask_t channelMaskFromString(const std::string &literalChannels);
+audio_channel_mask_t LIBMEDIAHELPER_API channelMaskFromString(const std::string &literalChannels);
 
-ChannelTraits::Collection channelMasksFromString(
+ChannelTraits::Collection LIBMEDIAHELPER_API channelMasksFromString(
         const std::string &channels, const char *del = AudioParameter::valueListSeparator);
 
-InputChannelTraits::Collection inputChannelMasksFromString(
+InputChannelTraits::Collection LIBMEDIAHELPER_API inputChannelMasksFromString(
         const std::string &inChannels, const char *del = AudioParameter::valueListSeparator);
 
-OutputChannelTraits::Collection outputChannelMasksFromString(
+OutputChannelTraits::Collection LIBMEDIAHELPER_API outputChannelMasksFromString(
         const std::string &outChannels, const char *del = AudioParameter::valueListSeparator);
 
 // counting enumerations
